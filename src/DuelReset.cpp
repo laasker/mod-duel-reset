@@ -160,14 +160,64 @@ void DuelReset::SaveHealthBeforeDuel(Player* player)
 
     m_healthBeforeDuel[player] = player->GetHealth();
 
-    // restore pets health
+    // Auras para remover de players após o duel
+    std::vector<uint32> auraIds =
+    {
+        11196, // Recently Bandaged
+        66233, // Ardent Defender
+        25771, // Forbearance - pala
+        61987, // Avenging Wrath Marker (server side forbearance) - pala
+        61988, // Server Side Forbearance (Divine Shield Exclude Aura) 
+        6788,  // Weakened Soul (Priest)
+        41425, // Hipothermia (Mage)
+        79500, // Cheated Death (Custom)
+        79503, // Reincarnation (Custom)
+        79501, // Forbearance Avenging Wrath (Custom)
+        79502, // Nature's Guardian (Rshaman - Custom)
+        // 57723, // Sated (Bloodlust)
+        // 57724, // Exhaustion (heroism)
+        // 2825 = Bloodlust, 32182 = Heroism
+
+        // Trinkets:
+        71491, 71559, 83098, // Aim of the Iron Dwarves
+        71485, 71556, 83096, // Agility of the Vrykul
+        71484, 71561, 83095, // Strength of the Taunka
+        71492, 71560, 83099, // Speed of the Vrykul
+        75456, 75458, 83115, // Sharpened Twilight Scale
+        75466, 75473, 83116, // Charred Twilight Scale
+        71605, 71636, 83117, // Phylactery
+        71601, 71644, 83118, // Dislodged Foreign Object
+        71401, 71541, 83114, // Whispering Fanged Skull
+        67703, 67708, 67772, 67773, 83112, 83113, // DV/DC
+
+        // Auras Pets:
+        47865, 22959, 55360, 47867, // Elements / Imp Scorch / Living Bomb / Curse of Doom
+        12579, 42842, 42917, 42931, 33395, 31589, 12494, 55080, // Winter's Chill / Fbolt / Nova / Cone of Cold / PetNova / Arcane Mage Slow / Frostbite / Barrier Nova
+        12826, 10326, 14327, 17928, 6215, 10890, // Polymorph / Turn Evil / Scare Beast / Howl / Fear / Psychic Scream
+        14309, 60210, 53338, 16857, 770, 53308, 53313 // Trap, Trap2, Hunter's Mark, FFF, FF, Root, natures grasp Root
+    };
+
+    // Remova auras de trinkets de players após o duel
+    for (uint32 id : auraIds)
+        player->RemoveAurasDueToSpell(id);
+
+    // restore pets health + remove debuffs
     if (Pet* pet = player->GetPet())
     {
         if (pet && pet->IsInWorld())
+        {
             if (pet->IsAlive())
+            {
                 pet->SetHealth(pet->GetMaxHealth());
-    }
 
+                for (uint32 id : auraIds)
+                {
+                    // remove pet debuffs
+                    pet->RemoveAurasDueToSpell(id);
+                }
+            }
+        }
+    }
 }
 
 void DuelReset::RestoreHealthAfterDuel(Player* player)
