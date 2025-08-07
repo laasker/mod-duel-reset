@@ -228,6 +228,31 @@ void DuelReset::RestoreHealthAfterDuel(Player* player)
 
     player->SetHealth(savedPlayerHealth->second);
     m_healthBeforeDuel.erase(player);
+
+    if (!player)
+        return;
+
+    switch (player->getPowerType())
+    {
+        case POWER_MANA:
+            player->SetPower(POWER_MANA, player->GetMaxPower(POWER_MANA));
+            if (player->getClass() == CLASS_DRUID)
+                player->SetPower(POWER_MANA, player->GetMaxPower(POWER_MANA));
+            break;
+        case POWER_ENERGY:
+            player->SetPower(POWER_ENERGY, player->GetMaxPower(POWER_ENERGY));
+            if (player->getClass() == CLASS_DRUID)
+                player->SetPower(POWER_MANA, player->GetMaxPower(POWER_MANA));
+            break;
+        case POWER_RUNIC_POWER:
+            player->SetPower(POWER_RUNIC_POWER, 0);
+            break;
+        //case POWER_RAGE:
+        //    player->SetPower(POWER_RAGE, 0);
+        //    break;
+        default:
+            break;
+    }
 }
 
 void DuelReset::SaveManaBeforeDuel(Player* player)

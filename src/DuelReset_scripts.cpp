@@ -126,9 +126,6 @@ public:
             // Health and mana restore
             if (sDuelReset->GetResetHealthEnabled())
             {
-                sDuelReset->RestoreHealthAfterDuel(winner);
-                sDuelReset->RestoreHealthAfterDuel(loser);
-
                 // check if player1 class uses mana
                 if (winner->getPowerType() == POWER_MANA || winner->getClass() == CLASS_DRUID)
                     sDuelReset->RestoreManaAfterDuel(winner);
@@ -136,6 +133,9 @@ public:
                 // check if player2 class uses mana
                 if (loser->getPowerType() == POWER_MANA || loser->getClass() == CLASS_DRUID)
                     sDuelReset->RestoreManaAfterDuel(loser);
+
+                sDuelReset->RestoreHealthAfterDuel(winner);
+                sDuelReset->RestoreHealthAfterDuel(loser);
             }
         }
 
