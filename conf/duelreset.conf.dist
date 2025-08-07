@@ -41,6 +41,17 @@ DuelReset.Zones = "0"
 #        Examples:    "85;1" - (Tirisfal Glades;Dun Morogh)
 #                     "0" - (none)
 #                     ""  - (any)
-#        Default:     "12;14;809" - (Elwynn Forest;Durotar;Gates of Ironforge)
+#        Default:     "12;14;809"
+#                     Elwynn Forest;Durotar;Gates of Ironforge) + GrizzHills - Voldrune Mall(4207), PvpZone5 Arathi Highlands(2401), PvpZone1 Throne of Elements(3615), Tanaris PvP Zone2 (987),
+#                     PvPzone3 Winterspring (2241) e PvPzone4 Silithus (2477), 3817 = Testing(caixa area de GM)
 
-DuelReset.Areas = "12;14;809"
+#DuelReset.Areas = "12;14;809, "
+DuelReset.Areas = "12;14;809;4207;2401;3615;987;2241;2477;3817"
+
+
+# to do
+# DuelReset.Areas.Phasing
+#        Description: Whitelist of AreaIDs separated by Semicolons (;) where phasing duels are enabled.
+#        Default: "4207" - (Mall)
+#
+# DuelReset.Areas.Phasing = "4207"
