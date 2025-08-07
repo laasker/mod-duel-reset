@@ -113,6 +113,27 @@ public:
                     sDuelReset->RestoreManaAfterDuel(loser);
             }
         }
+
+        // Revive pets
+        Pet* pet1 = winner->GetPet();
+        Pet* pet2 = loser->GetPet();
+
+        if (!pet1 || !pet2)
+            return;
+
+        if (!pet1->IsAlive() || !pet2->IsAlive())
+        {
+            if (winner->getClass() == CLASS_HUNTER || loser->getClass() == CLASS_HUNTER)
+            {
+                pet1->SetPower(POWER_HAPPINESS, pet1->GetMaxPower(POWER_HAPPINESS));
+                pet2->SetPower(POWER_HAPPINESS, pet2->GetMaxPower(POWER_HAPPINESS));
+            }
+            pet1->setDeathState(DeathState::Alive);
+            pet2->setDeathState(DeathState::Alive);
+        }
+
+        pet1->SetHealth(pet1->GetMaxHealth());
+        pet2->SetHealth(pet2->GetMaxHealth());
     }
 };
 

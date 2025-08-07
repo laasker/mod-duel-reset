@@ -62,6 +62,25 @@ void DuelReset::ResetSpellCooldowns(Player* player, bool onStartDuel)
             && (onStartDuel ? (categoryCooldown - remainingCooldown) > m_cooldownAge * IN_MILLISECONDS : true)
             )
             player->RemoveSpellCooldown(itr->first, true);
+
+        // Clear pet CDs
+        if (Pet* pet = player->GetPet())
+        {
+            if (pet && pet->IsInWorld())
+            {
+                uint32 infTime = GameTime::GetGameTimeMS().count() + infinityCooldownDelayCheck;
+                if (!pet->m_CreatureSpellCooldowns.empty())
+                {
+                    for (auto itr = pet->m_CreatureSpellCooldowns.begin(); itr != pet->m_CreatureSpellCooldowns.end(); ++itr)
+                    {
+                        if (itr->second.end < infTime)
+                            player->SendClearCooldown(itr->first, pet);
+                    }
+                    pet->m_CreatureSpellCooldowns.clear();
+                }
+            }
+        }
+
     }
 
     if (Pet* pet = player->GetPet())
@@ -140,6 +159,15 @@ void DuelReset::SaveHealthBeforeDuel(Player* player)
         return;
 
     m_healthBeforeDuel[player] = player->GetHealth();
+
+    // restore pets health
+    if (Pet* pet = player->GetPet())
+    {
+        if (pet && pet->IsInWorld())
+            if (pet->IsAlive())
+                pet->SetHealth(pet->GetMaxHealth());
+    }
+
 }
 
 void DuelReset::RestoreHealthAfterDuel(Player* player)
