@@ -49,6 +49,9 @@ public:
         PLAYERHOOK_ON_DUEL_END
     }) {}
 
+    //uint32 PhasedDueling::getNormalPhase(Player* player) const
+    // add phase duel? https://github.com/azerothcore/mod-phased-duels/blob/master/src/mod_phased_duels.cpp
+
     // Called when a duel starts (after 3s countdown)
     void OnPlayerDuelStart(Player *player1, Player *player2) override {
         // Check if Reset is allowed in area or zone
