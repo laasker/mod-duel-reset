@@ -76,12 +76,37 @@ public:
             }
             player1->ResetAllPowers();
 
+            player1->ClearDiminishings(); // Clear Diminishing Returns
+            if (Pet* pet = player1->GetPet())
+            {
+                if (pet && pet->IsInWorld())
+                {
+                    if (pet->IsAlive())
+                    {
+                        pet->ClearDiminishings();
+                    }
+                }
+            }
+
+
             sDuelReset->SaveHealthBeforeDuel(player2);
             if (player2->getPowerType() == POWER_MANA || player2->getClass() == CLASS_DRUID)
             {
                 sDuelReset->SaveManaBeforeDuel(player2);
             }
             player2->ResetAllPowers();
+
+            player2->ClearDiminishings(); // Clear Diminishing Returns
+            if (Pet* pet = player2->GetPet())
+            {
+                if (pet && pet->IsInWorld())
+                {
+                    if (pet->IsAlive())
+                    {
+                        pet->ClearDiminishings();
+                    }
+                }
+            }
         }
     }
 
