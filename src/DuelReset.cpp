@@ -194,7 +194,7 @@ void DuelReset::SaveHealthBeforeDuel(Player* player)
         47865, 22959, 55360, 47867, // Elements / Imp Scorch / Living Bomb / Curse of Doom
         12579, 42842, 42917, 42931, 33395, 31589, 12494, 55080, // Winter's Chill / Fbolt / Nova / Cone of Cold / PetNova / Arcane Mage Slow / Frostbite / Barrier Nova
         12826, 10326, 14327, 17928, 6215, 10890, // Polymorph / Turn Evil / Scare Beast / Howl / Fear / Psychic Scream
-        14309, 60210, 53338, 16857, 770, 53308, 53313 // Trap, Trap2, Hunter's Mark, FFF, FF, Root, natures grasp Root
+        14309, 60210, 53338, 16857, 770, 53308, 53313, 55711 // Trap, Trap2, Hunter's Mark, FFF, FF, Root, natures grasp Root, Heart of the Phoenix (8min pet reincarnation)
     };
 
     // Remova auras de trinkets de players após o duel
