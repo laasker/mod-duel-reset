@@ -49,6 +49,9 @@ public:
         PLAYERHOOK_ON_DUEL_END
     }) {}
 
+    //uint32 PhasedDueling::getNormalPhase(Player* player) const
+    // add phase duel? https://github.com/azerothcore/mod-phased-duels/blob/master/src/mod_phased_duels.cpp
+
     // Called when a duel starts (after 3s countdown)
     void OnPlayerDuelStart(Player *player1, Player *player2) override {
         // Check if Reset is allowed in area or zone
@@ -76,12 +79,37 @@ public:
             }
             player1->ResetAllPowers();
 
+            player1->ClearDiminishings(); // Clear Diminishing Returns
+            if (Pet* pet = player1->GetPet())
+            {
+                if (pet && pet->IsInWorld())
+                {
+                    if (pet->IsAlive())
+                    {
+                        pet->ClearDiminishings();
+                    }
+                }
+            }
+
+
             sDuelReset->SaveHealthBeforeDuel(player2);
             if (player2->getPowerType() == POWER_MANA || player2->getClass() == CLASS_DRUID)
             {
                 sDuelReset->SaveManaBeforeDuel(player2);
             }
             player2->ResetAllPowers();
+
+            player2->ClearDiminishings(); // Clear Diminishing Returns
+            if (Pet* pet = player2->GetPet())
+            {
+                if (pet && pet->IsInWorld())
+                {
+                    if (pet->IsAlive())
+                    {
+                        pet->ClearDiminishings();
+                    }
+                }
+            }
         }
     }
 
@@ -101,9 +129,6 @@ public:
             // Health and mana restore
             if (sDuelReset->GetResetHealthEnabled())
             {
-                sDuelReset->RestoreHealthAfterDuel(winner);
-                sDuelReset->RestoreHealthAfterDuel(loser);
-
                 // check if player1 class uses mana
                 if (winner->getPowerType() == POWER_MANA || winner->getClass() == CLASS_DRUID)
                     sDuelReset->RestoreManaAfterDuel(winner);
@@ -111,8 +136,32 @@ public:
                 // check if player2 class uses mana
                 if (loser->getPowerType() == POWER_MANA || loser->getClass() == CLASS_DRUID)
                     sDuelReset->RestoreManaAfterDuel(loser);
+
+                sDuelReset->RestoreHealthAfterDuel(winner);
+                sDuelReset->RestoreHealthAfterDuel(loser);
             }
         }
+
+        // Revive pets
+        Pet* pet1 = winner->GetPet();
+        Pet* pet2 = loser->GetPet();
+
+        if (!pet1 || !pet2)
+            return;
+
+        if (!pet1->IsAlive() || !pet2->IsAlive())
+        {
+            if (winner->getClass() == CLASS_HUNTER || loser->getClass() == CLASS_HUNTER)
+            {
+                pet1->SetPower(POWER_HAPPINESS, pet1->GetMaxPower(POWER_HAPPINESS));
+                pet2->SetPower(POWER_HAPPINESS, pet2->GetMaxPower(POWER_HAPPINESS));
+            }
+            pet1->setDeathState(DeathState::Alive);
+            pet2->setDeathState(DeathState::Alive);
+        }
+
+        pet1->SetHealth(pet1->GetMaxHealth());
+        pet2->SetHealth(pet2->GetMaxHealth());
     }
 };
 
