@@ -18,7 +18,10 @@
  */
 
 #include "DuelReset.h"
+#include "Cell.h"
+#include "CellImpl.h"
 #include "GameTime.h"
+#include "GridNotifiersImpl.h"
 #include "Pet.h"
 #include "SpellMgr.h"
 
@@ -172,9 +175,10 @@ void DuelReset::RestoreManaAfterDuel(Player* player)
 
 void DuelReset::LoadConfig(bool /*reload*/)
 {
-    m_enableCooldowns = sConfigMgr->GetOption<bool>("DuelReset.Cooldowns", true);
-    m_enableHealth = sConfigMgr->GetOption<bool>("DuelReset.HealthMana", true);
-    m_cooldownAge = sConfigMgr->GetOption<uint32>("DuelReset.CooldownAge", 30);
+    m_enableCooldowns    = sConfigMgr->GetOption<bool>("DuelReset.Cooldowns", true);
+    m_enableHealth       = sConfigMgr->GetOption<bool>("DuelReset.HealthMana", true);
+    m_enablePhasedDuels  = sConfigMgr->GetOption<bool>("DuelReset.PhasedDuels", false);
+    m_cooldownAge        = sConfigMgr->GetOption<uint32>("DuelReset.CooldownAge", 30);
 
     FillWhitelist(sConfigMgr->GetOption<std::string>("DuelReset.Zones", "0"), m_zoneWhitelist);
     FillWhitelist(sConfigMgr->GetOption<std::string>("DuelReset.Areas", "12;14;809"), m_areaWhitelist);
@@ -225,4 +229,78 @@ std::vector<uint32> DuelReset::GetZoneWhitelist() const
 std::vector<uint32> DuelReset::GetAreaWhitelist() const
 {
     return m_areaWhitelist;
+}
+
+bool DuelReset::GetPhasedDuelsEnabled() const
+{
+    return m_enablePhasedDuels;
+}
+
+uint32 DuelReset::GetNormalPhase(Player* player) const
+{
+    if (player->IsGameMaster())
+        return uint32(PHASEMASK_ANYWHERE);
+
+    uint32 phase = PHASEMASK_NORMAL;
+    Player::AuraEffectList const& phases = player->GetAuraEffectsByType(SPELL_AURA_PHASE);
+    if (!phases.empty())
+        phase = phases.front()->GetMiscValue();
+    if (uint32 n_phase = phase & ~PHASEMASK_NORMAL)
+        return n_phase;
+
+    return PHASEMASK_NORMAL;
+}
+
+void DuelReset::ApplyDuelPhase(Player* firstplayer, Player* secondplayer)
+{
+    Map* map = firstplayer->GetMap();
+    if (map->IsDungeon())
+        return;
+
+    // Duel flag is used as duel center point
+    GameObject* go = map->GetGameObject(firstplayer->GetGuidValue(PLAYER_DUEL_ARBITER));
+    if (!go)
+        return;
+
+    // Get players from 100 yard radius (duel radius is 40-50 yd)
+    std::list<Player*> playerList;
+    Acore::AnyPlayerInObjectRangeCheck checker(go, 100.0f);
+    Acore::PlayerListSearcher<Acore::AnyPlayerInObjectRangeCheck> searcher(go, playerList, checker);
+    Cell::VisitObjects(go, searcher, 100.0f);
+
+    // Collect all phases currently in use, ignore GMs
+    uint32 usedPhases = 0;
+    for (Player* p : playerList)
+        if (!p->IsGameMaster())
+            usedPhases |= p->GetPhaseMask();
+
+    // Find the first unused unique phase
+    for (uint32 phase = 2; phase <= UINT_MAX / 2; phase *= 2)
+    {
+        if (usedPhases & phase)
+            continue;
+
+        // Phase players & pets, defer visibility update
+        firstplayer->SetPhaseMask(phase, false);
+        secondplayer->SetPhaseMask(phase, false);
+        // Phase duel flag object
+        go->SetPhaseMask(phase, true);
+        // Update visibility so pets get phased and won't despawn
+        firstplayer->UpdateObjectVisibility();
+        secondplayer->UpdateObjectVisibility();
+        return;
+    }
+
+    ChatHandler(firstplayer->GetSession()).SendNotification("There are no free phases available for this duel.");
+    ChatHandler(secondplayer->GetSession()).SendNotification("There are no free phases available for this duel.");
+}
+
+void DuelReset::RemoveDuelPhase(Player* firstplayer, Player* secondplayer)
+{
+    // Restore players to their original phases, defer visibility update
+    firstplayer->SetPhaseMask(GetNormalPhase(firstplayer), false);
+    secondplayer->SetPhaseMask(GetNormalPhase(secondplayer), false);
+    // Update visibility so pets get unphased correctly
+    firstplayer->UpdateObjectVisibility();
+    secondplayer->UpdateObjectVisibility();
 }

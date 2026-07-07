@@ -56,6 +56,10 @@ public:
             return;
         }
 
+        // Phased duels
+        if (sDuelReset->GetPhasedDuelsEnabled())
+            sDuelReset->ApplyDuelPhase(player1, player2);
+
         // Cooldowns reset
         if (sDuelReset->GetResetCooldownsEnabled())
         {
@@ -91,6 +95,10 @@ public:
         // Checking zone here is not necessary and would open options or abuse
         // do not reset anything if DUEL_INTERRUPTED or DUEL_FLED
         if (type == DUEL_WON) {
+            // Remove phase isolation
+            if (sDuelReset->GetPhasedDuelsEnabled())
+                sDuelReset->RemoveDuelPhase(winner, loser);
+
             // Cooldown restore
             if (sDuelReset->GetResetCooldownsEnabled())
             {

@@ -3,6 +3,9 @@
 
 #include "Player.h"
 #include "Config.h"
+#include "GridNotifiers.h"
+#include "SpellAuraEffects.h"
+#include "SpellAuras.h"
 #include <unordered_map>
 
 class DuelReset
@@ -22,9 +25,14 @@ public:
     void RestoreHealthAfterDuel(Player* player);
     void RestoreManaAfterDuel(Player* player);
 
+    void ApplyDuelPhase(Player* firstplayer, Player* secondplayer);
+    void RemoveDuelPhase(Player* firstplayer, Player* secondplayer);
+    uint32 GetNormalPhase(Player* player) const;
+
     bool IsAllowedInArea(Player* player) const;
     bool GetResetCooldownsEnabled() const;
     bool GetResetHealthEnabled() const;
+    bool GetPhasedDuelsEnabled() const;
     uint32 GetCooldownAge() const;
     std::vector<uint32> GetZoneWhitelist() const;
     std::vector<uint32> GetAreaWhitelist() const;
@@ -32,6 +40,7 @@ private:
     // Config values
     bool m_enableCooldowns;
     bool m_enableHealth;
+    bool m_enablePhasedDuels;
     uint32 m_cooldownAge;
     std::vector<uint32> m_zoneWhitelist;
     std::vector<uint32> m_areaWhitelist;

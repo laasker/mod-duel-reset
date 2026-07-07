@@ -44,3 +44,13 @@ DuelReset.Zones = "0"
 #        Default:     "12;14;809" - (Elwynn Forest;Durotar;Gates of Ironforge)
 
 DuelReset.Areas = "12;14;809"
+
+#    DuelReset.PhasedDuels
+#        Description: When enabled, dueling players are moved to an isolated phase so they cannot
+#                     be targeted, interrupted, or seen by bystanders during the duel.
+#                     The phase is automatically restored when the duel ends.
+#                     Note: Does not apply inside dungeons/instances.
+#        Default:     0  - (Disabled)
+#                     1  - (Enabled)
+
+DuelReset.PhasedDuels = 0
