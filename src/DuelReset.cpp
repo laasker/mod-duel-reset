@@ -159,6 +159,28 @@ void DuelReset::SaveHealthBeforeDuel(Player* player)
 
     m_healthBeforeDuel[player] = player->GetHealth();
 
+    switch (player->getPowerType())
+    {
+        case POWER_MANA:
+            player->SetPower(POWER_MANA, player->GetMaxPower(POWER_MANA));
+            if (player->getClass() == CLASS_DRUID)
+                player->SetPower(POWER_MANA, player->GetMaxPower(POWER_MANA));
+            break;
+        case POWER_ENERGY:
+            player->SetPower(POWER_ENERGY, player->GetMaxPower(POWER_ENERGY));
+            if (player->getClass() == CLASS_DRUID)
+                player->SetPower(POWER_MANA, player->GetMaxPower(POWER_MANA));
+            break;
+        case POWER_RUNIC_POWER:
+            player->SetPower(POWER_RUNIC_POWER, 0);
+            break;
+        //case POWER_RAGE:
+        //    player->SetPower(POWER_RAGE, 0);
+        //    break;
+        default:
+            break;
+    }
+
     // restore pets health
     if (Pet* pet = player->GetPet())
     {
